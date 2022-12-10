@@ -6,7 +6,7 @@ minimal setup for golang web app with nginx proxy (for demo only)
 ### Usage
 
 ```sh
-% docker-compose up -d
+% docker compose up -d
 ```
 
 
