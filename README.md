@@ -1,56 +1,46 @@
-# Golang App with Nginx Proxy
+# nginx-proxy-golang
 
-minimal setup for golang web app with nginx proxy (for demo only)
+NGINX reverse proxy with Golang backend service that demonstrate what would be inclued in request headers.
 
+## ⚠️  DISCLAIMER ⚠️ 
 
-### Usage (docker-compose)
+> This is for demonstration purposes only. Do not use in production environments.
 
-```sh
-$ cd docker-compose
+## Quick Start
+
+### Option 1: Docker Compose (Recommended for beginners)
+
+1. Navigate to the docker-compose directory:
+
+```bash
+cd docker-compose
 ```
 
-```sh
-$ docker compose up -d
+2. Start the services:
+
+```bash
+docker-compose up
 ```
 
-```sh
-$ curl http://localhost:8080
+3. Open the page with your browser: http://localhost:8080
 
-Host => "localhost"
-RemoteAddr => "192.168.48.3:33522"
+You should see your request headers displayed on the page.
 
-"X-Forwarded-For" => ["192.168.48.1"]
-"Connection" => ["close"]
-"User-Agent" => ["curl/7.78.0"]
-"Accept" => ["*/*"]
-"X-Real-Ip" => ["192.168.48.1"]
-"X-Forwarded-Proto" => ["http"]
+### Option 2: Kubernetes
+
+1. Apply the Kubernetes manifests:
+
+```bash
+kubectl apply -f kubernetes/
 ```
 
-### Usage (kubernetes)
+2. Forward the port to access locally:
 
-```sh
-$ cd kubernetes
+```bash
+kubectl port-forward service/nginx 8080:80
 ```
 
-```sh
-$ kubectl apply -f .
-```
+3. Open the page with your browser: http://localhost:8080
 
-```sh
-$ kubectl port-forward service/nginx
-```
+You should see your request headers displayed on the page.
 
-```sh
-$ curl http://localhost:8080
-
-Host => "localhost"
-RemoteAddr => "192.168.48.3:33522"
-
-"X-Forwarded-For" => ["192.168.48.1"]
-"Connection" => ["close"]
-"User-Agent" => ["curl/7.78.0"]
-"Accept" => ["*/*"]
-"X-Real-Ip" => ["192.168.48.1"]
-"X-Forwarded-Proto" => ["http"]
-```
