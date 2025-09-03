@@ -1,0 +1,90 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    service: backend
+  name: backend
+spec:
+  ports:
+    - name: "9000"
+      port: 9000
+      targetPort: 9000
+  selector:
+    service: backend
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: backend
+  template:
+    metadata:
+      labels:
+        service: backend
+    spec:
+      containers:
+        - name: backend
+          image: public.ecr.aws/docker/library/golang:1.25-alpine
+          args:
+            - go
+            - run
+            - /opt/main.go
+          ports:
+            - containerPort: 9000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /opt/main.go
+              name: backend-config
+              readOnly: true
+              subPath: main.go
+      volumes:
+        - name: backend-config
+          configMap:
+            name: backend-config
+            items:
+              - key: main.go
+                path: main.go
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  annotations:
+    use-subpath: "true"
+  labels:
+    service: backend
+  name: backend-config
+data:
+  main.go: |
+    package main
+
+    import (
+    	"flag"
+    	"fmt"
+    	"log"
+    	"net/http"
+    )
+
+    func main() {
+    	var listenPort = flag.Int("p", 9000, "listen port")
+    	flag.Parse()
+
+    	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    		// basic information
+    		fmt.Fprintf(w, "Host => %q\n", r.Host)
+    		fmt.Fprintf(w, "RemoteAddr => %q\n\n", r.RemoteAddr)
+
+    		// print out all request headers
+    		for k, v := range r.Header {
+    			fmt.Fprintf(w, "%q => %q\n", k, v)
+    		}
+    	})
+
+    	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *listenPort), nil))
+    }
